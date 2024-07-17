@@ -1,0 +1,63 @@
+import * as React from "react" import * as ReactDOM from "react-dom/client"
+import * as Framer from "framer" window.__framer_importFromPackage =
+(packageAndFilename, exportIdentifier) => () => { return
+React.createElement(Framer.ErrorPlaceholder, { error: 'Package component not
+supported: "' + exportIdentifier + '" in "' + packageAndFilename + '"' }) } // A
+lot of libraries assume process.env.NODE_ENV is present in runtime/buildtime, so
+we are polyfilling it window.process = { ...window.process, env: {
+...(window.process ? window.process.env: undefined), NODE_ENV: "production" } }
+// Fallback support for stack gaps Framer.installFlexboxGapWorkaroundIfNeeded()
+window.__framer_events = window.__framer_events || [] function track() {
+window.__framer_events.push(arguments) } function callWhenDOMReady(callback) {
+if (document.readyState === "interactive" || document.readyState === "complete")
+{ callback() } else { // Note that we’re listening to readystatechange instead
+of DOMContentLoaded because the latter // doesn’t accurately reflect when the
+DOM is ready. Specifically, it’s delayed by scripts with // a defer attribute.
+document.addEventListener("readystatechange", () => { if (document.readyState
+=== "interactive") callback() }) } } callWhenDOMReady(async function() { try {
+const routes = {augiA20Il: {elements: {BYeg4BelE: "connect", CXKaeNzEe: "hero",
+e2mBAIYqr: "exploratio", HsZZzRF5u: "areas", i2YXDLswt: "portfolio", Ss6VqI6V4:
+"story"}, page: Framer.lazy(() =>
+import("https://framerusercontent.com/modules/mkM7ABvJVfMI7viRdXs3/fUYguv9A8uS9nEvBZ2Ga/augiA20Il.js")),
+path: "/"}, v8dKGH7dP: {elements: {FmFlEsRXh: "connect"}, page: Framer.lazy(()
+=>
+import("https://framerusercontent.com/modules/QAhy4zOZy79MG6HO9VFi/4zsX30daF33ex5DnSdkR/v8dKGH7dP.js")),
+path: "/404"}} const collectionUtils = {} const locales = [{code: "en", id:
+"default", name: "English", slug: ""}] const notFoundPage = Framer.lazy(() =>
+import("https://framerusercontent.com/modules/QAhy4zOZy79MG6HO9VFi/4zsX30daF33ex5DnSdkR/v8dKGH7dP.js"))
+const container = document.getElementById("main") let routeId, localeId,
+pathVariables, breakpoints, shouldHydrate = false if ("framerHydrateV2" in
+container.dataset) { const routeData =
+JSON.parse(container.dataset.framerHydrateV2) routeId = routeData.routeId
+localeId = routeData.localeId pathVariables = routeData.pathVariables
+breakpoints = routeData.breakpoints shouldHydrate = true } else { const
+routeData = Framer.inferInitialRouteFromPath(routes,
+decodeURIComponent(location.pathname), true, locales) routeId =
+routeData.routeId localeId = routeData.localeId pathVariables =
+routeData.pathVariables } const route = routes[routeId] const RootComponent =
+await route.page.preload() routes[routeId].page = RootComponent const
+improveInpDuringHydration = true const content = React.createElement(
+Framer.PageRoot, { RootComponent, isWebsite: true, routeId, pathVariables,
+routes, collectionUtils, framerSiteId:
+"e7dd4aecbc402f69a0f3c5042373d7859eebefd5d46479ab0bd26468df475a31",
+notFoundPage, isReducedMotion: undefined, localeId, locales,
+preserveQueryParams: undefined, enableImproveInpDuringHydration:
+improveInpDuringHydration, addHydrationMarkers: shouldHydrate, } ) const
+contentWithFeaturesContext = React.createElement(
+Framer.LibraryFeaturesProvider, { children: content, value:
+{imgSizesWorkaroundEnabled: false} } ) const page =
+React.createElement(Framer.PageEffectsProvider, { children:
+contentWithFeaturesContext, value: {routes: {}} }) if (shouldHydrate) {
+performance.mark("framer-rewrite-breakpoints-start")
+Framer.removeHiddenBreakpointLayersV2(breakpoints)
+window.__framer_onRewriteBreakpoints?.(breakpoints)
+performance.mark("framer-rewrite-breakpoints-end")
+performance.measure("framer-rewrite-breakpoints",
+"framer-rewrite-breakpoints-start", "framer-rewrite-breakpoints-end")
+React.startTransition(() => { performance.mark("framer-hydration-start") if
+(improveInpDuringHydration) window.__FRAMER_TURN_OFF_REACT_EVENT_HANDLING__?.()
+ReactDOM.hydrateRoot(container, page) }) } else {
+ReactDOM.createRoot(container).render(page) } } catch (error) {
+track("published_site_load_error", { message: String(error), stack: error
+instanceof Error && typeof error.stack === "string" ? error.stack : null })
+throw error } })

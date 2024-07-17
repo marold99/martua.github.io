@@ -1,0 +1,114 @@
+import{jsx as
+_jsx}from"react/jsx-runtime";import{useState,useEffect}from"react";import{useScroll,useVelocity,useTransform,useMotionValue,animate}from"framer-motion";//
+The following overrides are for creating scroll effects on web pages export
+function withParallax(Component){const speed=1;return
+props=>{const{scrollY}=useScroll();const
+x=useTransform(scrollY,value=>-value*speed)// scrolling down translates left
+;return /*#__PURE__*/_jsx(Component,{...props,style:{...props.style,x}});};}//
+Scrub through a video or drive a Lottie animation by scrolling export function
+withScrolledProgress(Component){const startY=0// scroll position when animation
+starts ;const distance=5436// scroll distance after which animation ends ;const
+endY=startY+distance;return props=>{const{scrollY}=useScroll();const
+progress=useTransform(scrollY,[startY,endY],[0,1]);return
+/*#__PURE__*/_jsx(Component,{...props,progress:progress});};}export function
+withScrollLinkedValue(Component){// Value being driven by scrolling (e.g.
+height) const initialValue=200;const finalValue=100;const speed=1;const
+scrollDistance=(initialValue-finalValue)/speed;const startY=150// scroll
+position when transition starts ;const endY=startY+scrollDistance;return
+props=>{const{scrollY}=useScroll();const
+scrollOutput=useTransform(scrollY,[startY,startY,endY,endY],[initialValue,initialValue,finalValue,finalValue],{clamp:false});return
+/*#__PURE__*/_jsx(Component,{...props,style:{...props.style,height:scrollOutput}});};}export
+function withScrollToggledVariant(Component){const thresholdY=500// set the
+scroll position where you want the component to switch ;return
+props=>{const{scrollY}=useScroll();const[isPastThreshold,setIsPastThreshold]=useState(false);useEffect(()=>scrollY.onChange(latest=>setIsPastThreshold(latest>thresholdY)),[]);return
+/*#__PURE__*/_jsx(Component,{...props,variant:isPastThreshold?"Second":"First"});};}export
+function withSlideOutOnScrollUp(Component){const slideDistance=100// if we are
+sliding out a nav bar at the top of the screen, this will be it's height ;const
+threshold=500// only slide it back when scrolling back at velocity above this
+positive (or zero) value ;return props=>{const{scrollY}=useScroll();const
+scrollVelocity=useVelocity(scrollY);const[isScrollingBack,setIsScrollingBack]=useState(false);const[isAtTop,setIsAtTop]=useState(true)//
+true if the page is not scrolled or fully scrolled back
+;const[isInView,setIsInView]=useState(true);useEffect(()=>scrollVelocity.onChange(latest=>{if(latest>0){setIsScrollingBack(false);return;}if(latest<-threshold){setIsScrollingBack(true);return;}}),[]);useEffect(()=>scrollY.onChange(latest=>setIsAtTop(latest<=0)),[]);useEffect(()=>setIsInView(isScrollingBack||isAtTop),[isScrollingBack,isAtTop]);return
+/*#__PURE__*/_jsx(Component,{...props,animate:{y:isInView?0:-slideDistance},transition:{duration:.2,delay:.25,ease:"easeInOut"}});};}export
+function withScrollTriggeredStates(Component){const scrollYRange=[0,1e3,1600]//
+scroll positions that trigger the animation ;const
+outputRange=["First","Second","Third"]// list of variants to animate between
+;return props=>{const
+state=useScrollTriggeredState(scrollYRange,outputRange);return
+/*#__PURE__*/_jsx(Component,{...props,variant:state});};}// Trigger a state
+change when each layer with a
+<section>
+  tag reaches the top of the page // You can apply a
+  <section>
+    tag to a layer through the 'Accessibility' property controls export function
+    withSectionTriggeredStates(Component){const
+    outputRange=["First","Second","Third"]// list of variants to animate between
+    ;return
+    props=>{const{scrollY}=useScroll();const[state,setState]=useState(outputRange[0]);useEffect(()=>{const
+    scrollYRange=getSectionPositions();scrollY.onChange(latest=>{const
+    output=getCorrespondingItem(latest,scrollYRange,outputRange);setState(output);});},[]);return
+    /*#__PURE__*/_jsx(Component,{...props,variant:state});};}export function
+    withScrollTriggeredAnimation(Component){const scrollYRange=[0,1e3,1600]//
+    scroll positions that trigger the animation ;const
+    outputRange=["#8E47BA","#000AFF","#FF0000"]// list of values to animate to
+    ;// customise the transition const
+    transition={type:"tween",duration:1,ease:"easeInOut"};return props=>{const
+    animatedValue=useMotionValue(outputRange[0]);const{scrollY}=useScroll();const
+    scrollOutput=useSteppedTransform(scrollY,scrollYRange,outputRange);useEffect(()=>scrollOutput.onChange(latest=>animate(animatedValue,latest,transition)//
+    remove transition to use default ),[]);return
+    /*#__PURE__*/_jsx(Component,{...props,style:{...props.style,backgroundColor:animatedValue}})//
+    override value you want to animate ;};}// Trigger an animation when each
+    layer with a
+    <section>
+      tag reaches the top of the page // You can apply a
+      <section>
+        tag to a layer through the 'Accessibility' property controls export
+        function withSectionTriggeredAnimation(Component){const
+        outputRange=["#FFEE66","#000AFF","#FF0000"]// list of values to animate
+        to ;// customise the transition const
+        transition={type:"tween",duration:1,ease:"easeInOut"};return
+        props=>{const animatedValue=useMotionValue(outputRange[0]);const
+        handleSectionChange=latest=>animate(animatedValue,outputRange[latest],transition)//
+        remove transition to use default
+        ;useSectionTrigger(handleSectionChange);return
+        /*#__PURE__*/_jsx(Component,{...props,style:{...props.style,backgroundColor:animatedValue}})//
+        override value you want to animate ;};}// Apply the current scroll
+        target to the URL displayed in the web browser // You can apply a scroll
+        target to a layer through the 'Scroll Target' property controls export
+        function withScrollTargetHistory(Component){return
+        props=>{const{scrollY}=useScroll();const
+        scrollOutput=useMotionValue("#");const
+        handleTargetChange=latest=>history.replaceState(null,"",latest);useEffect(()=>{const{scrollYRange,outputRange}=getScrollTargets();scrollY.onChange(latest=>{const
+        index=getMatchingIndex(latest,scrollYRange);if(scrollOutput.get()!==outputRange[index]){scrollOutput.set(outputRange[index]);}});},[]);useEffect(()=>scrollOutput.onChange(handleTargetChange),[]);return
+        /*#__PURE__*/_jsx(Component,{...props});};}// Custom hooks function
+        useSteppedTransform(value,inputRange,outputRange){return
+        useTransform(value,value=>getCorrespondingItem(value,inputRange,outputRange));}function
+        useScrollTriggeredState(inputRange,outputRange){const{scrollY}=useScroll();const[state,setState]=useState(outputRange[0]);useEffect(()=>scrollY.onChange(latest=>setState(getCorrespondingItem(latest,inputRange,outputRange))),[]);return
+        state;}function useSectionTrigger(handleSectionChange){const
+        scrollOutput=useMotionValue(0);const{scrollY}=useScroll();useEffect(()=>{const
+        scrollYRange=getSectionPositions();scrollY.onChange(latest=>{const
+        index=getMatchingIndex(latest,scrollYRange);if(scrollOutput.get()!==index){scrollOutput.set(index);}});},[]);useEffect(()=>scrollOutput.onChange(handleSectionChange),[]);}//
+        Functions function getMatchingIndex(value,array){let
+        found=array.findIndex(el=>el>value);switch(found){case 0:return
+        0;break;case-1:return array.length-1;break;default:return
+        found-1;}}function
+        getCorrespondingItem(value,inputRange,outputRange){const
+        inputIndex=getMatchingIndex(value,inputRange);const
+        outputIndex=inputIndex>outputRange.length-1?outputRange.length-1:inputIndex;return
+        outputRange[outputIndex];}function getSectionPositions(){const
+        elements=Array.from(document.querySelectorAll("section"));const
+        positions=elements.map(element=>{return
+        element.getBoundingClientRect().top+window.scrollY;}).sort((a,b)=>a-b);if(positions[0]===0){return
+        positions;}else{return[0,...positions];}}function
+        getScrollTargets(){const
+        elements=Array.from(document.querySelectorAll('[id]:not([id=""])'));const
+        targets=elements.map(element=>{return{y:element.getBoundingClientRect().top+window.scrollY,target:`#${element.id}`};}).sort((a,b)=>a.y-b.y);const
+        inputs=targets.map(target=>target.y);const
+        outputs=targets.map(target=>target.target);if(inputs[0]===0){outputs[0]="#";return{scrollYRange:inputs,outputRange:outputs};}else{return{scrollYRange:[0,...inputs],outputRange:["#",...outputs]};}}
+        export const __FramerMetadata__ =
+        {"exports":{"withScrollTriggeredStates":{"type":"reactHoc","name":"withScrollTriggeredStates","annotations":{"framerContractVersion":"1"}},"withScrollLinkedValue":{"type":"reactHoc","name":"withScrollLinkedValue","annotations":{"framerContractVersion":"1"}},"withScrollToggledVariant":{"type":"reactHoc","name":"withScrollToggledVariant","annotations":{"framerContractVersion":"1"}},"withScrollTriggeredAnimation":{"type":"reactHoc","name":"withScrollTriggeredAnimation","annotations":{"framerContractVersion":"1"}},"withSlideOutOnScrollUp":{"type":"reactHoc","name":"withSlideOutOnScrollUp","annotations":{"framerContractVersion":"1"}},"withScrolledProgress":{"type":"reactHoc","name":"withScrolledProgress","annotations":{"framerContractVersion":"1"}},"withParallax":{"type":"reactHoc","name":"withParallax","annotations":{"framerContractVersion":"1"}},"withSectionTriggeredStates":{"type":"reactHoc","name":"withSectionTriggeredStates","annotations":{"framerContractVersion":"1"}},"withScrollTargetHistory":{"type":"reactHoc","name":"withScrollTargetHistory","annotations":{"framerContractVersion":"1"}},"withSectionTriggeredAnimation":{"type":"reactHoc","name":"withSectionTriggeredAnimation","annotations":{"framerContractVersion":"1"}},"__FramerMetadata__":{"type":"variable"}}}
+        //# sourceMappingURL=./Scroll_3.map
+      </section>
+    </section>
+  </section>
+</section>
